@@ -1,4 +1,5 @@
 import os
+import re
 
 PROMPT_MATCH_WORDS = 10
 
@@ -15,7 +16,8 @@ def scan(folder):
 
 
 def _prompt_key(prompt):
-    words = prompt.strip().split()[:PROMPT_MATCH_WORDS]
+    cleaned = re.sub(r"[,\.;:!?]", "", prompt)
+    words = cleaned.strip().split()[:PROMPT_MATCH_WORDS]
     return "_".join(w.lower() for w in words)
 
 
