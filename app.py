@@ -81,6 +81,7 @@ def upload_images():
 
         result = google_client.upload_file(output_path, DRIVE_FOLDER_ID)
         if result["ok"]:
+            google_client.mark_row_uploaded(SPREADSHEET_ID, SHEET_NAME, pair["date"])
             try:
                 os.remove(output_path)
             except Exception:

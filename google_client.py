@@ -7,7 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets.readonly",
+    "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
 
@@ -88,6 +88,32 @@ def _parse_topic(topic):
     line1 = parts[0] if parts else ""
     line2 = parts[1] if len(parts) > 1 else ""
     return line1, line2
+
+
+def mark_row_uploaded(spreadsheet_id, sheet_name, date):
+    try:
+        service = get_sheets_service()
+        result = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheet_id,
+            range=f"'{sheet_name}'!A:A",
+        ).execute()
+        rows = result.get("values", [])
+        row_index = None
+        for i, row in enumerate(rows):
+            if row and row[0].strip() == date:
+                row_index = i + 1
+                break
+        if row_index is None:
+            return {"ok": False, "error": f"Row with date {date} not found in sheet."}
+        service.spreadsheets().values().update(
+            spreadsheetId=spreadsheet_id,
+            range=f"'{sheet_name}'!F{row_index}",
+            valueInputOption="RAW",
+            body={"values": [["TRUE"]]},
+        ).execute()
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 def upload_file(local_path, folder_id):
