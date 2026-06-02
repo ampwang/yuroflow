@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  fetchBtn.addEventListener('click', fetchSheet);
+  fetchBtn.addEventListener('click', async () => { await fetchSheet(); await scanImages(); });
   scanBtn.addEventListener('click', scanImages);
 
   processBtn.addEventListener('click', () => {
@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (data.ok) {
         authStatus.textContent = `Connected — "${data.title}"`;
-        fetchSheet();
-        scanImages();
+        await fetchSheet();
+        await scanImages();
       } else {
         authStatus.textContent = 'Not connected.';
         authBtn.style.display = 'inline-block';
