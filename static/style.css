@@ -53,6 +53,15 @@ section h2 {
   padding-bottom: 8px;
 }
 
+.section-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

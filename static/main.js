@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const progress = document.getElementById('progress');
   const authStatus = document.getElementById('auth-status');
   const authBtn = document.getElementById('auth-btn');
+  const fetchBtn = document.getElementById('fetch-btn');
+  const fetchStatus = document.getElementById('fetch-status');
+  const sheetRows = document.getElementById('sheet-rows');
 
   checkAuth();
 
@@ -21,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  fetchBtn.addEventListener('click', fetchSheet);
+
   processBtn.addEventListener('click', () => {
     progress.textContent = 'Processing...';
   });
@@ -35,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (data.ok) {
         authStatus.textContent = `Connected — "${data.title}"`;
+        fetchSheet();
       } else {
         authStatus.textContent = 'Not connected.';
         authBtn.style.display = 'inline-block';
@@ -43,5 +49,43 @@ document.addEventListener('DOMContentLoaded', () => {
       authStatus.textContent = 'Not connected.';
       authBtn.style.display = 'inline-block';
     }
+  }
+
+  async function fetchSheet() {
+    fetchBtn.disabled = true;
+    fetchStatus.textContent = 'Loading…';
+    sheetRows.innerHTML = '';
+    try {
+      const res = await fetch('/api/sheet-rows');
+      const data = await res.json();
+      if (!data.ok) {
+        fetchStatus.textContent = 'Error: ' + data.error;
+        return;
+      }
+      if (data.rows.length === 0) {
+        fetchStatus.textContent = 'No pending rows found.';
+        return;
+      }
+      data.rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.dataset.date = row.date;
+        tr.innerHTML = `
+          <td>${row.date}</td>
+          <td><input type="text" value="${escHtml(row.line1)}" data-field="line1" /></td>
+          <td><input type="text" value="${escHtml(row.line2)}" data-field="line2" /></td>
+          <td class="row-status">—</td>
+        `;
+        sheetRows.appendChild(tr);
+      });
+      fetchStatus.textContent = `${data.rows.length} row${data.rows.length !== 1 ? 's' : ''} loaded.`;
+    } catch (e) {
+      fetchStatus.textContent = 'Request failed.';
+    } finally {
+      fetchBtn.disabled = false;
+    }
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 });

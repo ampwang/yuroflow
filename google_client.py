@@ -1,4 +1,5 @@
 import os
+import re
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -53,12 +54,46 @@ def get_drive_service():
     return build("drive", "v3", credentials=creds)
 
 
+def fetch_sheet_rows(spreadsheet_id, sheet_name):
+    try:
+        service = get_sheets_service()
+        result = service.spreadsheets().values().get(
+            spreadsheetId=spreadsheet_id,
+            range=f"'{sheet_name}'!A:G",
+        ).execute()
+        rows = result.get("values", [])
+        output = []
+        for i, row in enumerate(rows):
+            date = row[0].strip() if len(row) > 0 else ""
+            topic = row[1].strip() if len(row) > 1 else ""
+            col_f = row[5].strip() if len(row) > 5 else ""
+            col_g = row[6].strip() if len(row) > 6 else ""
+            if not date or not topic:
+                continue
+            if col_f or col_g:
+                continue
+            line1, line2 = _parse_topic(topic)
+            output.append({"date": date, "line1": line1, "line2": line2})
+        return {"ok": True, "rows": output}
+    except HttpError as e:
+        return {"ok": False, "error": str(e)}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def _parse_topic(topic):
+    cleaned = re.sub(r"\s*\([^)]*\)\s*", " ", topic).strip()
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    parts = cleaned.split(" ", 1)
+    line1 = parts[0] if parts else ""
+    line2 = parts[1] if len(parts) > 1 else ""
+    return line1, line2
+
+
 def test_sheets_connection(spreadsheet_id):
     try:
         service = get_sheets_service()
         result = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         return {"ok": True, "title": result.get("properties", {}).get("title", "")}
-    except HttpError as e:
-        return {"ok": False, "error": str(e)}
-    except RuntimeError as e:
+    except Exception as e:
         return {"ok": False, "error": str(e)}
