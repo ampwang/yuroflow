@@ -37,7 +37,21 @@
 
     <section id="image-matching">
       <h2>Image Matching</h2>
-      <div id="image-list"></div>
+      <div class="section-toolbar">
+        <button id="scan-btn">Scan Images</button>
+        <span id="scan-status"></span>
+      </div>
+      <table id="match-table" style="display:none">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Image File</th>
+            <th>→</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="match-rows"></tbody>
+      </table>
     </section>
 
     <section id="actions">

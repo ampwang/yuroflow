@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, jsonify
 import google_client
+import image_scanner
 
 COWORK_DIR = os.path.expanduser("~/Downloads/CoWork")
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
@@ -39,6 +40,12 @@ def sheet_rows():
     result = google_client.fetch_sheet_rows(SPREADSHEET_ID, SHEET_NAME)
     status = 200 if result["ok"] else 500
     return jsonify(result), status
+
+
+@app.route("/api/images")
+def images():
+    result = image_scanner.scan(COWORK_DIR)
+    return jsonify(result)
 
 
 if __name__ == "__main__":
