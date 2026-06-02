@@ -57,7 +57,7 @@ tai-hla-processor/
 ## Google Sheet
 
 URL: https://docs.google.com/spreadsheets/d/16h9zxHXVz0CxznKGe-SSjD8OVrFZLElv2dmBuKnuh10/edit
-Sheet name: Tian Xia Content Calendar
+Sheet name: Sheet1
 Account: dearyorustory@gmail.com
 
 | Column | Name | Used by this app |

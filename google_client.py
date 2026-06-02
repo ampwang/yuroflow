@@ -90,6 +90,16 @@ def _parse_topic(topic):
     return line1, line2
 
 
+def list_sheet_names(spreadsheet_id):
+    try:
+        service = get_sheets_service()
+        result = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        names = [s["properties"]["title"] for s in result.get("sheets", [])]
+        return {"ok": True, "sheets": names}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 def test_sheets_connection(spreadsheet_id):
     try:
         service = get_sheets_service()
