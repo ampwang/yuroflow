@@ -1,6 +1,6 @@
 # YoruFlow
 
-A local web tool for managing content pipelines across automated Facebook pages. Currently supports ใต้หล้า: reads the Google Sheet, adds Thai text overlays to Leonardo AI images, renames them to YYYY-MM-DD.jpg, and uploads them to Google Drive.
+A local web tool for managing content pipelines across automated Facebook pages. Reads the Google Sheet, adds Thai text overlays to Leonardo AI images, renames them to YYYY-MM-DD.jpg, and uploads them to Google Drive.
 
 Designed to expand — new pages and new pipeline steps can be added over time.
 
@@ -142,10 +142,10 @@ User can confirm or reorder before processing.
 
 1. Scaffold — Flask app, requirements.txt, folder structure, .gitignore, confirm app runs on localhost:5000
 2. Google auth — OAuth flow using credentials.json, token saved to token.json, confirm Sheets read works
-3. Sheet fetch — read ใต้หล้า Content Calendar, filter correct rows, parse topics into Line 1 + Line 2, display in UI table with editable fields
+3. Sheet fetch — read the Content Calendar sheet, filter correct rows, parse topics into Line 1 + Line 2, display in UI table with editable fields
 4. Image scan — scan ~/Downloads/CoWork for images, sort by creation time, display matched pairs in UI
 5. Image processor — Pillow overlay: black rectangle + Sarabun Bold Line 1 + Sarabun Regular Line 2, save to output/YYYY-MM-DD.jpg
-6. Drive upload — upload output/ files to "ใต้หล้า Images" folder on Google Drive, show per-file upload status in UI. After each file is confirmed uploaded, delete the source from ~/Downloads/CoWork and the processed file from output/
+6. Drive upload — upload output/ files to the Images folder on Google Drive, show per-file upload status in UI. After each file is confirmed uploaded, delete the source from ~/Downloads/CoWork and the processed file from output/
 7. Polish — loading states, error messages, clear success confirmation per step
 
 ---
