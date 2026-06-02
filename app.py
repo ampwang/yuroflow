@@ -1,7 +1,8 @@
 import os
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import google_client
 import image_scanner
+import image_processor
 
 COWORK_DIR = os.path.expanduser("~/Downloads/CoWork")
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
@@ -46,6 +47,21 @@ def sheet_rows():
 def images():
     result = image_scanner.scan(COWORK_DIR)
     return jsonify(result)
+
+
+@app.route("/api/process", methods=["POST"])
+def process_images():
+    pairs = request.json
+    results = []
+    for pair in pairs:
+        source = os.path.join(COWORK_DIR, pair["image"])
+        output = os.path.join(OUTPUT_DIR, pair["date"] + ".jpg")
+        try:
+            image_processor.process(source, output, pair["line1"], pair["line2"])
+            results.append({"date": pair["date"], "ok": True})
+        except Exception as e:
+            results.append({"date": pair["date"], "ok": False, "error": str(e)})
+    return jsonify({"results": results})
 
 
 if __name__ == "__main__":

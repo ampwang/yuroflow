@@ -33,8 +33,31 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchBtn.addEventListener('click', async () => { await fetchSheet(); await scanImages(); });
   scanBtn.addEventListener('click', scanImages);
 
-  processBtn.addEventListener('click', () => {
-    progress.textContent = 'Processing...';
+  processBtn.addEventListener('click', async () => {
+    const pairs = buildPairs();
+    if (pairs.length === 0) {
+      progress.textContent = 'No matched pairs to process.';
+      return;
+    }
+    processBtn.disabled = true;
+    progress.textContent = 'Processing…';
+    try {
+      const res = await fetch('/api/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pairs),
+      });
+      const data = await res.json();
+      const lines = data.results.map(r =>
+        r.ok ? `✓ ${r.date}` : `✗ ${r.date}: ${r.error}`
+      );
+      progress.textContent = lines.join('\n');
+      updateRowStatuses(data.results);
+    } catch {
+      progress.textContent = 'Process request failed.';
+    } finally {
+      processBtn.disabled = false;
+    }
   });
 
   uploadBtn.addEventListener('click', () => {
@@ -132,6 +155,26 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       scanBtn.disabled = false;
     }
+  }
+
+  function buildPairs() {
+    const rows = Array.from(matchRows.querySelectorAll('tr'));
+    return rows
+      .filter(tr => tr.dataset.date)
+      .map(tr => {
+        const date = tr.dataset.date;
+        const sheetTr = sheetRowsTbody.querySelector(`tr[data-date="${date}"]`);
+        const line1 = sheetTr ? sheetTr.querySelector('[data-field="line1"]').value : '';
+        const line2 = sheetTr ? sheetTr.querySelector('[data-field="line2"]').value : '';
+        return { image: tr.dataset.image, date, line1, line2 };
+      });
+  }
+
+  function updateRowStatuses(results) {
+    results.forEach(r => {
+      const tr = sheetRowsTbody.querySelector(`tr[data-date="${r.date}"]`);
+      if (tr) tr.querySelector('.row-status').textContent = r.ok ? 'Processed' : 'Error';
+    });
   }
 
   function escHtml(str) {
