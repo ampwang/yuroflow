@@ -11,9 +11,25 @@ body {
   padding: 24px;
 }
 
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 header h1 {
   font-size: 1.6rem;
-  margin-bottom: 24px;
+}
+
+#auth-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #555;
 }
 
 main {
