@@ -8,5 +8,5 @@ def scan(folder):
         f for f in os.listdir(folder)
         if f.lower().endswith((".jpg", ".jpeg", ".png"))
     ]
-    files.sort(key=lambda f: os.path.getctime(os.path.join(folder, f)))
+    files.sort()
     return {"ok": True, "images": files}
