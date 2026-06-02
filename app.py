@@ -8,6 +8,7 @@ COWORK_DIR = os.path.expanduser("~/Downloads/CoWork")
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 SPREADSHEET_ID = "16h9zxHXVz0CxznKGe-SSjD8OVrFZLElv2dmBuKnuh10"
 SHEET_NAME = "Sheet1"
+BRAND_LABEL = "ใต้หล้า"
 
 app = Flask(__name__)
 
@@ -57,7 +58,7 @@ def process_images():
         source = os.path.join(COWORK_DIR, pair["image"])
         output = os.path.join(OUTPUT_DIR, pair["date"] + ".jpg")
         try:
-            image_processor.process(source, output, pair["line1"], pair["line2"])
+            image_processor.process(source, output, pair["line1"], pair["line2"], BRAND_LABEL)
             results.append({"date": pair["date"], "ok": True})
         except Exception as e:
             results.append({"date": pair["date"], "ok": False, "error": str(e)})

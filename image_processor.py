@@ -32,7 +32,9 @@ FONT_BOLD_PATH = os.path.join(FONTS_DIR, "Sarabun-Bold.ttf")
 FONT_REGULAR_PATH = os.path.join(FONTS_DIR, "Sarabun-Regular.ttf")
 LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.jpg")
 LOGO_SIZE = 90
-LOGO_MARGIN = 18
+LOGO_MARGIN = 40
+LABEL_FONT = "Sarabun"
+LABEL_SIZE = 22
 
 _fonts_registered = False
 
@@ -86,7 +88,7 @@ def _render_text(attr_str, width, height):
     return Image.frombytes("RGBA", (width, height), bytes(buf), "raw", "RGBA")
 
 
-def process(source_path, output_path, line1, line2):
+def process(source_path, output_path, line1, line2, brand_label=""):
     _ensure_fonts()
 
     font_bold = NSFont.fontWithName_size_("Sarabun-Bold", 52)
@@ -121,11 +123,38 @@ def process(source_path, output_path, line1, line2):
     if os.path.exists(LOGO_PATH):
         logo = Image.open(LOGO_PATH).convert("RGBA")
         logo = logo.resize((LOGO_SIZE, LOGO_SIZE), Image.LANCZOS)
-        mask = Image.new("L", (LOGO_SIZE, LOGO_SIZE), 0)
-        ImageDraw.Draw(mask).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), fill=255)
-        logo.putalpha(mask)
+
+        circle_mask = Image.new("L", (LOGO_SIZE, LOGO_SIZE), 0)
+        ImageDraw.Draw(circle_mask).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), fill=255)
+        logo.putalpha(circle_mask)
+
+        border_img = Image.new("RGBA", (LOGO_SIZE, LOGO_SIZE), (0, 0, 0, 0))
+        ImageDraw.Draw(border_img).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), outline=(255, 255, 255, 255), width=1)
         logo_x = w - LOGO_SIZE - LOGO_MARGIN
-        logo_y = rect_top + (rect_h - LOGO_SIZE) // 2
-        img.paste(logo, (logo_x, logo_y), mask=logo)
+        img.paste(logo, (logo_x, LOGO_MARGIN), mask=logo)
+        img.paste(border_img, (logo_x, LOGO_MARGIN), mask=border_img)
+
+        if brand_label:
+            font_label = NSFont.fontWithName_size_(LABEL_FONT, LABEL_SIZE)
+            from Cocoa import NSShadow, NSShadowAttributeName
+            shadow = NSShadow.alloc().init()
+            shadow.setShadowColor_(NSColor.blackColor())
+            shadow.setShadowBlurRadius_(3)
+            shadow.setShadowOffset_((0, 0))
+            para = NSMutableParagraphStyle.alloc().init()
+            para.setAlignment_(2)
+            label_attrs = {
+                NSFontAttributeName: font_label,
+                NSForegroundColorAttributeName: NSColor.whiteColor(),
+                NSParagraphStyleAttributeName: para,
+                NSShadowAttributeName: shadow,
+            }
+            label_str = NSAttributedString.alloc().initWithString_attributes_(brand_label, label_attrs)
+            label_w = LOGO_SIZE + 20
+            label_h = _measure_height(label_str, label_w)
+            label_img = _render_text(label_str, label_w, label_h)
+            label_x = logo_x - 10
+            label_y = LOGO_MARGIN + LOGO_SIZE + 4
+            img.paste(label_img, (label_x, label_y), mask=label_img)
 
     img.convert("RGB").save(output_path, "JPEG", quality=95)
