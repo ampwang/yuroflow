@@ -116,8 +116,9 @@ def process(source_path, output_path, line1, line2, brand_label=""):
     total_h = h1 + gap + h2
     block_top = rect_top + (rect_h - total_h) // 2
 
-    text1_img = _render_text(attr1, w, h1)
-    text2_img = _render_text(attr2, w, h2)
+    descender_pad = 14
+    text1_img = _render_text(attr1, w, h1 + descender_pad)
+    text2_img = _render_text(attr2, w, h2 + descender_pad)
     img.paste(text1_img, (0, block_top), mask=text1_img)
     img.paste(text2_img, (0, block_top + h1 + gap), mask=text2_img)
 
