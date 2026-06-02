@@ -30,6 +30,9 @@ from Foundation import NSURL
 FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
 FONT_BOLD_PATH = os.path.join(FONTS_DIR, "Sarabun-Bold.ttf")
 FONT_REGULAR_PATH = os.path.join(FONTS_DIR, "Sarabun-Regular.ttf")
+LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.jpg")
+LOGO_SIZE = 90
+LOGO_MARGIN = 18
 
 _fonts_registered = False
 
@@ -114,5 +117,15 @@ def process(source_path, output_path, line1, line2):
     text2_img = _render_text(attr2, w, h2)
     img.paste(text1_img, (0, block_top), mask=text1_img)
     img.paste(text2_img, (0, block_top + h1 + gap), mask=text2_img)
+
+    if os.path.exists(LOGO_PATH):
+        logo = Image.open(LOGO_PATH).convert("RGBA")
+        logo = logo.resize((LOGO_SIZE, LOGO_SIZE), Image.LANCZOS)
+        mask = Image.new("L", (LOGO_SIZE, LOGO_SIZE), 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), fill=255)
+        logo.putalpha(mask)
+        logo_x = w - LOGO_SIZE - LOGO_MARGIN
+        logo_y = rect_top + (rect_h - LOGO_SIZE) // 2
+        img.paste(logo, (logo_x, logo_y), mask=logo)
 
     img.convert("RGB").save(output_path, "JPEG", quality=95)
