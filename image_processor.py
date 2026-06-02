@@ -69,15 +69,16 @@ def _measure_height(attr_str, width):
     return math.ceil(size.height)
 
 
-def _render_text(attr_str, width, height):
+def _render_text(attr_str, width, height, top_pad=0):
+    canvas_h = height + top_pad
     colorspace = CGColorSpaceCreateDeviceRGB()
-    buf = (ctypes.c_uint8 * (width * height * 4))()
+    buf = (ctypes.c_uint8 * (width * canvas_h * 4))()
     ctx = CGBitmapContextCreate(
-        buf, width, height, 8, width * 4, colorspace,
+        buf, width, canvas_h, 8, width * 4, colorspace,
         kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big,
     )
     CGContextSetRGBFillColor(ctx, 0, 0, 0, 0)
-    CGContextFillRect(ctx, CGRectMake(0, 0, width, height))
+    CGContextFillRect(ctx, CGRectMake(0, 0, width, canvas_h))
 
     setter = CTFramesetterCreateWithAttributedString(attr_str)
     path = CGPathCreateWithRect(CGRectMake(0, 0, width, height), None)
@@ -86,7 +87,7 @@ def _render_text(attr_str, width, height):
     )
     CTFrameDraw(frame, ctx)
 
-    return Image.frombytes("RGBA", (width, height), bytes(buf), "raw", "RGBA")
+    return Image.frombytes("RGBA", (width, canvas_h), bytes(buf), "raw", "RGBA")
 
 
 def process(source_path, output_path, line1, line2, brand_label=""):
@@ -116,10 +117,10 @@ def process(source_path, output_path, line1, line2, brand_label=""):
     total_h = h1 + gap + h2
     block_top = rect_top + (rect_h - total_h) // 2
 
-    ascender_pad = 10
+    ascender_pad = 14
     descender_pad = 14
-    text1_img = _render_text(attr1, w, h1 + ascender_pad + descender_pad)
-    text2_img = _render_text(attr2, w, h2 + ascender_pad + descender_pad)
+    text1_img = _render_text(attr1, w, h1 + descender_pad, top_pad=ascender_pad)
+    text2_img = _render_text(attr2, w, h2 + descender_pad, top_pad=ascender_pad)
     img.paste(text1_img, (0, block_top - ascender_pad), mask=text1_img)
     img.paste(text2_img, (0, block_top + h1 + gap - ascender_pad), mask=text2_img)
 
