@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys, json, os; d=json.load(sys.stdin); p=os.path.basename(d.get('path', '')); sys.exit(1 if p in ('credentials.json', 'token.json') else 0)\""
+          }
+        ]
+      }
+    ]
+  }
+}

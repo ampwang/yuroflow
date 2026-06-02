@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ใต้หล้า Image Processor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>ใต้หล้า Image Processor</h1>
+  </header>
+
+  <main>
+    <section id="sheet-data">
+      <h2>Sheet Data</h2>
+      <table id="sheet-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Line 1</th>
+            <th>Line 2</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="sheet-rows"></tbody>
+      </table>
+    </section>
+
+    <section id="image-matching">
+      <h2>Image Matching</h2>
+      <div id="image-list"></div>
+    </section>
+
+    <section id="actions">
+      <h2>Actions</h2>
+      <div class="action-buttons">
+        <button id="process-btn">Process Images</button>
+        <button id="upload-btn">Upload to Drive</button>
+      </div>
+      <div id="progress"></div>
+    </section>
+  </main>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
