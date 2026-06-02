@@ -32,9 +32,10 @@ FONT_BOLD_PATH = os.path.join(FONTS_DIR, "Sarabun-Bold.ttf")
 FONT_REGULAR_PATH = os.path.join(FONTS_DIR, "Sarabun-Regular.ttf")
 LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.jpg")
 LOGO_SIZE = 90
-LOGO_MARGIN = 40
+LOGO_MARGIN = 30
 LABEL_FONT = "Sarabun"
-LABEL_SIZE = 22
+LABEL_SIZE = 18
+LABEL_RIGHT = 45
 
 _fonts_registered = False
 
@@ -129,7 +130,7 @@ def process(source_path, output_path, line1, line2, brand_label=""):
         logo.putalpha(circle_mask)
 
         border_img = Image.new("RGBA", (LOGO_SIZE, LOGO_SIZE), (0, 0, 0, 0))
-        ImageDraw.Draw(border_img).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), outline=(255, 255, 255, 255), width=1)
+        ImageDraw.Draw(border_img).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), outline=(0, 0, 0, 255), width=1)
         logo_x = w - LOGO_SIZE - LOGO_MARGIN
         img.paste(logo, (logo_x, LOGO_MARGIN), mask=logo)
         img.paste(border_img, (logo_x, LOGO_MARGIN), mask=border_img)
@@ -153,7 +154,7 @@ def process(source_path, output_path, line1, line2, brand_label=""):
             label_w = LOGO_SIZE + 20
             label_h = _measure_height(label_str, label_w)
             label_img = _render_text(label_str, label_w, label_h)
-            label_x = logo_x - 10
+            label_x = w - label_w - LABEL_RIGHT
             label_y = LOGO_MARGIN + LOGO_SIZE + 4
             img.paste(label_img, (label_x, label_y), mask=label_img)
 
