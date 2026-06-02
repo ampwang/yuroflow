@@ -108,7 +108,7 @@ def mark_row_uploaded(spreadsheet_id, sheet_name, date):
         service.spreadsheets().values().update(
             spreadsheetId=spreadsheet_id,
             range=f"'{sheet_name}'!F{row_index}",
-            valueInputOption="RAW",
+            valueInputOption="USER_ENTERED",
             body={"values": [["TRUE"]]},
         ).execute()
         return {"ok": True}
