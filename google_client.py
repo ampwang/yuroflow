@@ -90,6 +90,36 @@ def _parse_topic(topic):
     return line1, line2
 
 
+def upload_file(local_path, folder_id):
+    try:
+        from googleapiclient.http import MediaFileUpload
+        service = get_drive_service()
+        filename = os.path.basename(local_path)
+
+        existing = service.files().list(
+            q=f"name='{filename}' and '{folder_id}' in parents and trashed=false",
+            fields="files(id)",
+        ).execute().get("files", [])
+
+        media = MediaFileUpload(local_path, mimetype="image/jpeg", resumable=False)
+
+        if existing:
+            service.files().update(
+                fileId=existing[0]["id"],
+                media_body=media,
+            ).execute()
+        else:
+            service.files().create(
+                body={"name": filename, "parents": [folder_id]},
+                media_body=media,
+                fields="id",
+            ).execute()
+
+        return {"ok": True, "filename": filename}
+    except Exception as e:
+        return {"ok": False, "filename": os.path.basename(local_path), "error": str(e)}
+
+
 def list_sheet_names(spreadsheet_id):
     try:
         service = get_sheets_service()

@@ -60,8 +60,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  uploadBtn.addEventListener('click', () => {
-    progress.textContent = 'Uploading...';
+  uploadBtn.addEventListener('click', async () => {
+    const pairs = buildPairs();
+    if (pairs.length === 0) {
+      progress.textContent = 'No matched pairs to upload.';
+      return;
+    }
+    uploadBtn.disabled = true;
+    progress.textContent = 'Uploading to Drive…';
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pairs),
+      });
+      const data = await res.json();
+      const lines = data.results.map(r =>
+        r.ok ? `✓ ${r.date} — uploaded` : `✗ ${r.date}: ${r.error}`
+      );
+      progress.textContent = lines.join('\n');
+      updateRowStatuses(data.results.map(r => ({ ...r, status: r.ok ? 'Uploaded' : 'Error' })));
+      if (data.results.some(r => r.ok)) {
+        await fetchSheet();
+        await scanImages();
+      }
+    } catch {
+      progress.textContent = 'Upload request failed.';
+    } finally {
+      uploadBtn.disabled = false;
+    }
   });
 
   async function checkAuth() {
@@ -170,10 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  function updateRowStatuses(results) {
+  function updateRowStatuses(results, defaultOkLabel = 'Processed') {
     results.forEach(r => {
       const tr = sheetRowsTbody.querySelector(`tr[data-date="${r.date}"]`);
-      if (tr) tr.querySelector('.row-status').textContent = r.ok ? 'Processed' : 'Error';
+      if (tr) tr.querySelector('.row-status').textContent = r.ok ? (r.status || defaultOkLabel) : 'Error';
     });
   }
 

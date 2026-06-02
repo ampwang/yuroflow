@@ -9,6 +9,7 @@ OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 SPREADSHEET_ID = "16h9zxHXVz0CxznKGe-SSjD8OVrFZLElv2dmBuKnuh10"
 SHEET_NAME = "Sheet1"
 BRAND_LABEL = "ใต้หล้า"
+DRIVE_FOLDER_ID = "1B4PL5liav3v4Eh7xbwobwSmvCzI6McCk"
 
 app = Flask(__name__)
 
@@ -62,6 +63,33 @@ def process_images():
             results.append({"date": pair["date"], "ok": True})
         except Exception as e:
             results.append({"date": pair["date"], "ok": False, "error": str(e)})
+    return jsonify({"results": results})
+
+
+@app.route("/api/upload", methods=["POST"])
+def upload_images():
+    pairs = request.json
+    results = []
+    for pair in pairs:
+        filename = pair["date"] + ".jpg"
+        output_path = os.path.join(OUTPUT_DIR, filename)
+        source_path = os.path.join(COWORK_DIR, pair["image"])
+
+        if not os.path.exists(output_path):
+            results.append({"date": pair["date"], "ok": False, "error": "Processed file not found — run Process Images first."})
+            continue
+
+        result = google_client.upload_file(output_path, DRIVE_FOLDER_ID)
+        if result["ok"]:
+            try:
+                os.remove(output_path)
+            except Exception:
+                pass
+            try:
+                os.remove(source_path)
+            except Exception:
+                pass
+        results.append({"date": pair["date"], "ok": result["ok"], "error": result.get("error", "")})
     return jsonify({"results": results})
 
 
