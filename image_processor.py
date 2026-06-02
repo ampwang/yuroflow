@@ -31,11 +31,11 @@ FONTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
 FONT_BOLD_PATH = os.path.join(FONTS_DIR, "Sarabun-Bold.ttf")
 FONT_REGULAR_PATH = os.path.join(FONTS_DIR, "Sarabun-Regular.ttf")
 LOGO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.jpg")
-LOGO_SIZE = 90
+LOGO_SIZE = 80
 LOGO_MARGIN = 30
 LABEL_FONT = "Sarabun"
 LABEL_SIZE = 18
-LABEL_RIGHT = 45
+LABEL_RIGHT = 44
 
 _fonts_registered = False
 
@@ -126,11 +126,11 @@ def process(source_path, output_path, line1, line2, brand_label=""):
         logo = logo.resize((LOGO_SIZE, LOGO_SIZE), Image.LANCZOS)
 
         circle_mask = Image.new("L", (LOGO_SIZE, LOGO_SIZE), 0)
-        ImageDraw.Draw(circle_mask).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), fill=255)
+        ImageDraw.Draw(circle_mask).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), fill=204)
         logo.putalpha(circle_mask)
 
         border_img = Image.new("RGBA", (LOGO_SIZE, LOGO_SIZE), (0, 0, 0, 0))
-        ImageDraw.Draw(border_img).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), outline=(0, 0, 0, 255), width=1)
+        ImageDraw.Draw(border_img).ellipse((0, 0, LOGO_SIZE - 1, LOGO_SIZE - 1), outline=(40, 57, 76, 204), width=1)
         logo_x = w - LOGO_SIZE - LOGO_MARGIN
         img.paste(logo, (logo_x, LOGO_MARGIN), mask=logo)
         img.paste(border_img, (logo_x, LOGO_MARGIN), mask=border_img)
@@ -139,14 +139,14 @@ def process(source_path, output_path, line1, line2, brand_label=""):
             font_label = NSFont.fontWithName_size_(LABEL_FONT, LABEL_SIZE)
             from Cocoa import NSShadow, NSShadowAttributeName
             shadow = NSShadow.alloc().init()
-            shadow.setShadowColor_(NSColor.blackColor())
+            shadow.setShadowColor_(NSColor.whiteColor())
             shadow.setShadowBlurRadius_(3)
             shadow.setShadowOffset_((0, 0))
             para = NSMutableParagraphStyle.alloc().init()
             para.setAlignment_(2)
             label_attrs = {
                 NSFontAttributeName: font_label,
-                NSForegroundColorAttributeName: NSColor.whiteColor(),
+                NSForegroundColorAttributeName: NSColor.colorWithRed_green_blue_alpha_(40/255, 57/255, 76/255, 0.8),
                 NSParagraphStyleAttributeName: para,
                 NSShadowAttributeName: shadow,
             }
