@@ -47,8 +47,13 @@ def sheet_rows():
 
 @app.route("/api/images")
 def images():
-    result = image_scanner.scan(COWORK_DIR)
-    return jsonify(result)
+    scan_result = image_scanner.scan(COWORK_DIR)
+    if not scan_result["ok"]:
+        return jsonify(scan_result)
+    sheet_result = google_client.fetch_sheet_rows(SPREADSHEET_ID, SHEET_NAME)
+    rows = sheet_result.get("rows", []) if sheet_result["ok"] else []
+    matched = image_scanner.match_to_rows(scan_result["images"], rows)
+    return jsonify({"ok": True, "matched": matched})
 
 
 @app.route("/api/process", methods=["POST"])

@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const progress = document.getElementById('progress');
 
   let sheetRows = [];
+  let matchedPairs = [];
 
   checkAuth();
 
@@ -150,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scanStatus.textContent = 'Scanning…';
     matchRows.innerHTML = '';
     matchTable.style.display = 'none';
+    matchedPairs = [];
     try {
       const res = await fetch('/api/images');
       const data = await res.json();
@@ -157,26 +159,28 @@ document.addEventListener('DOMContentLoaded', () => {
         scanStatus.textContent = 'Error: ' + data.error;
         return;
       }
-      if (data.images.length === 0) {
+      if (data.matched.length === 0) {
         scanStatus.textContent = 'No images found in ~/Downloads/CoWork.';
         return;
       }
-      data.images.forEach((filename, i) => {
-        const date = sheetRows[i] ? sheetRows[i].date : '(no matching row)';
+      matchedPairs = data.matched;
+      let matchCount = 0;
+      data.matched.forEach((pair, i) => {
         const tr = document.createElement('tr');
-        tr.dataset.image = filename;
-        tr.dataset.date = sheetRows[i] ? sheetRows[i].date : '';
+        tr.dataset.date = pair.date;
+        tr.dataset.image = pair.image || '';
         tr.innerHTML = `
           <td>${i + 1}</td>
-          <td>${escHtml(filename)}</td>
+          <td>${pair.image ? escHtml(pair.image) : '<em>no image found</em>'}</td>
           <td>→</td>
-          <td>${date}</td>
+          <td>${pair.date}</td>
         `;
-        if (!sheetRows[i]) tr.classList.add('unmatched');
+        if (!pair.matched) tr.classList.add('unmatched');
+        else matchCount++;
         matchRows.appendChild(tr);
       });
       matchTable.style.display = '';
-      scanStatus.textContent = `${data.images.length} image${data.images.length !== 1 ? 's' : ''} found.`;
+      scanStatus.textContent = `${matchCount} of ${data.matched.length} rows matched.`;
     } catch {
       scanStatus.textContent = 'Request failed.';
     } finally {
@@ -185,15 +189,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function buildPairs() {
-    const rows = Array.from(matchRows.querySelectorAll('tr'));
-    return rows
-      .filter(tr => tr.dataset.date)
-      .map(tr => {
-        const date = tr.dataset.date;
-        const sheetTr = sheetRowsTbody.querySelector(`tr[data-date="${date}"]`);
-        const line1 = sheetTr ? sheetTr.querySelector('[data-field="line1"]').value : '';
-        const line2 = sheetTr ? sheetTr.querySelector('[data-field="line2"]').value : '';
-        return { image: tr.dataset.image, date, line1, line2 };
+    return matchedPairs
+      .filter(p => p.matched)
+      .map(p => {
+        const sheetTr = sheetRowsTbody.querySelector(`tr[data-date="${p.date}"]`);
+        const line1 = sheetTr ? sheetTr.querySelector('[data-field="line1"]').value : p.line1;
+        const line2 = sheetTr ? sheetTr.querySelector('[data-field="line2"]').value : p.line2;
+        return { image: p.image, date: p.date, line1, line2 };
       });
   }
 

@@ -72,8 +72,9 @@ def fetch_sheet_rows(spreadsheet_id, sheet_name):
                 continue
             if col_f or col_g:
                 continue
+            prompt = row[4].strip() if len(row) > 4 else ""
             line1, line2 = _parse_topic(topic)
-            output.append({"date": date, "line1": line1, "line2": line2})
+            output.append({"date": date, "line1": line1, "line2": line2, "prompt": prompt})
         return {"ok": True, "rows": output}
     except HttpError as e:
         return {"ok": False, "error": str(e)}
